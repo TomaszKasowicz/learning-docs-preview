@@ -85,5 +85,6 @@ jobs:
           token: ${{ secrets.GH_PAGES_PREVIEW }}
           pages-base-url: https://tomaszkasowicz.github.io/learning-docs-preview-repo
           pages-base-path: ./docs
+          umbrella-dir: ./docs/pr-preview
           comment: true
           action: auto
