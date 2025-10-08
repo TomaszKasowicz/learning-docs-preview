@@ -13,6 +13,9 @@ on:
 
 concurrency: preview-${{ github.ref }}
 
+permissions:
+  pull-requests: write
+
 jobs:
   build:
     if: ${{ contains(['opened', 'reopened', 'synchronize'], github.event.action) }}
@@ -73,6 +76,7 @@ jobs:
           source-dir: ./dist/docs/
           deploy-repository: TomaszKasowicz/learning-docs-preview-repo
           preview-branch: gh-pages
+          token: ${{ secrets.GH_PAGES_PREVIEW }}
           pages-base-url: https://tomaszkasowicz.github.io/learning-docs-preview-repo
           pages-base-path: ./docs
           comment: true
