@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 /**
  * Journey component
- * @description Journey component
+ * @description Journey component Testing
  * @example
  * <lib-journey></lib-journey>
  */

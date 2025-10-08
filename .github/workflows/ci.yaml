@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    if: ${{ contains(['opened', 'reopened', 'synchronize'], github.event.action) }}
+    if: ${{ contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,6 +26,9 @@ jobs:
         with:
           fetch-depth: 0
           filter: tree:0
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -38,15 +41,16 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npx nx affected:build
+        run: npx nx affected --target=build,test,lint
 
       - name: Run tests
-        run: npx nx affected:test
+        run: npx nx affected --target=test
 
       - name: Run Lint
-        run: npx nx affected:lint
+        run: npx nx affected --target=lint
 
   docs-preview:
+    if: ${{ github.event_name == 'pull_request' }}
     outputs:
       docs_built: ${{ steps.check-docs-built.outputs.docs_built }}
     runs-on: ubuntu-latest
@@ -56,6 +60,9 @@ jobs:
         with:
           fetch-depth: 0
           filter: tree:0
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -67,17 +74,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build docs
-        run: npx nx affected:build-docs
+      - name: Build Docs
+        run: npx nx affected --target=build-docs
+
+      - name: Check if dist/docs exists
+        id: check-docs-exist
+        run: |
+          if [ -d "dist/docs" ]; then
+            echo "docs_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Index Page
+        if: steps.check-docs-exist.outputs.docs_exist == 'true'
+        working-directory: ./dist/docs/
+        run: |
+          echo "<html><body><h1>${{ github.repository }} - PR ${{ github.event.pull_request.number }}</h1>" >> index.html
+          echo "<ul>" >> index.html
+          for idx in $(find . -mindepth 2 -maxdepth 3 -name "index.html"); do
+            name=$(dirname "$idx")
+            echo "<li><a href=\"$idx\">$name</a></li>" >> index.html
+          done
+          echo "</ul>" >> index.html
+          echo "</body></html>" >> index.html
 
       - name: Deploy preview
+        if: steps.check-docs-exist.outputs.docs_exist == 'true'
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: ./dist/docs/
           deploy-repository: TomaszKasowicz/learning-docs-preview-repo
           preview-branch: gh-pages
           token: ${{ secrets.GH_PAGES_PREVIEW }}
-          pages-base-url: https://tomaszkasowicz.github.io/learning-docs-preview-repo
+          pages-base-url: tomaszkasowicz.github.io/learning-docs-preview-repo
           pages-base-path: ./docs
+          umbrella-dir: ./docs/pr-preview
           comment: true
           action: auto
