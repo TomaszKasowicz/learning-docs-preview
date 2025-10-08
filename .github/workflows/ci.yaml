@@ -27,6 +27,9 @@ jobs:
           fetch-depth: 0
           filter: tree:0
 
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
@@ -56,6 +59,9 @@ jobs:
         with:
           fetch-depth: 0
           filter: tree:0
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
