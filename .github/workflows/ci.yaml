@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    if: ${{ contains(['opened', 'reopened', 'synchronize'], github.event.action) }}
+    if: ${{ contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
