@@ -43,6 +43,13 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "build-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "libs/journey",
+        "command": "npx compodoc -c ../../.compodocrc.json -p tsconfig.doc.json -n journey -d ../../dist/docs/journey/$(cat package.json | jq -cr '.version')"
+      }
     }
   }
 }
