@@ -1,0 +1,79 @@
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency: preview-${{ github.ref }}
+
+jobs:
+  build:
+    if: ${{ contains(['opened', 'reopened', 'synchronize'], github.event.action) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npx nx affected:build
+
+      - name: Run tests
+        run: npx nx affected:test
+
+      - name: Run Lint
+        run: npx nx affected:lint
+
+  docs-preview:
+    outputs:
+      docs_built: ${{ steps.check-docs-built.outputs.docs_built }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build docs
+        run: npx nx affected:build-docs
+
+      - name: Deploy preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: ./dist/docs/
+          deploy-repository: TomaszKasowicz/learning-docs-preview-repo
+          preview-branch: gh-pages
+          pages-base-url: https://tomaszkasowicz.github.io/learning-docs-preview-repo
+          pages-base-path: ./docs
+          comment: true
+          action: auto
