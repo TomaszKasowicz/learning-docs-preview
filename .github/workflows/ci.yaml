@@ -94,7 +94,8 @@ jobs:
           echo "<ul>" >> index.html
           for idx in $(find . -mindepth 2 -maxdepth 3 -name "index.html"); do
             name=$(dirname "$idx")
-            echo '<li><a href="$idx">$name</a></li>' >> index.html
+            echo "<li><a href=\"$idx\">$name</a></li>" >> index.html
+          done
           echo "</ul>" >> index.html
           echo "</body></html>" >> index.html
 
