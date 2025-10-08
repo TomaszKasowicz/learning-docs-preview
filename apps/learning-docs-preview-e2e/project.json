@@ -1,0 +1,9 @@
+{
+  "name": "learning-docs-preview-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/learning-docs-preview-e2e/src",
+  "implicitDependencies": ["learning-docs-preview"],
+  "// targets": "to see all targets run: nx show project learning-docs-preview-e2e --web",
+  "targets": {}
+}
